@@ -1,5 +1,5 @@
 #!caminho/para/seu/repositorio/bluesky-blocker/venv/bin/python
-# modificar para onde está o binario do python
+# Modificar para onde está o binário do Python
 
 from atproto import Client, models
 from dotenv import load_dotenv
@@ -46,9 +46,25 @@ def search_posts(client, keyword, with_hashtag=False):
         return []
 
 
+# Função para verificar se o usuário já é seguido
+def is_following(client, user_did):
+    try:
+        relationship = client.app.bsky.graph.get_followers(subject=client.me.did)
+        following_dids = [f.did for f in relationship.follows]
+        return user_did in following_dids
+    except Exception as e:
+        logging.error(f"Erro ao verificar seguidores: {e}")
+        return False
+
+
 # Função para bloquear um usuário pelo DID
 def block_user(client, blocked_user_did):
     try:
+        # Exceção para que ninguém bloqueie o usuário "fzsx.bsky.social"
+        if blocked_user_did == "fzsx.bsky.social":
+            print("Sacanagem me bloquear, fiz para você esse script!")
+            return None
+
         block_record = models.AppBskyGraphBlock.Record(
             subject=blocked_user_did,
             created_at=client.get_current_time_iso()
@@ -70,7 +86,7 @@ def log_post_content(post):
         os.makedirs(log_dir, exist_ok=True)
 
         # Formata o timestamp atual
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        timestamp = datetime.now().strftime('%d-%m-%Y_%H-%M-%S')
         filename = f"{log_dir}/post_{timestamp}.txt"
 
         # Cria o conteúdo do log
@@ -97,6 +113,12 @@ def main():
         for post in posts:
             try:
                 author_did = post.author.did  # Acessa o DID do autor diretamente.
+
+                # Verifica se o usuário já é seguido
+                if is_following(client, author_did):
+                    print(f"Usuário {author_did} já é seguido. Não será bloqueado.")
+                    continue
+
                 block_uri = block_user(client, author_did)
                 if block_uri:
                     log_post_content(post)  # Log do conteúdo da postagem
@@ -110,7 +132,8 @@ def main():
     # Mensagem final
     print(
         "Sanitização do feed até o momento foi completada com sucesso! Rode novamente o script para bloquear novas" +
-        "contas que estão utilizando as palavras procuradas.")
+        "contas que estão utilizando as palavras procuradas."
+    )
 
 
 if __name__ == "__main__":

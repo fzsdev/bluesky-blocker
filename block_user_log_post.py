@@ -1,3 +1,6 @@
+#!caminho/para/seu/repositorio/bluesky-blocker/venv/bin/python
+# modificar para onde está o binario do python
+
 from atproto import Client, models
 from dotenv import load_dotenv
 import os

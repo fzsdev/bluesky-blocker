@@ -9,6 +9,8 @@
   USERNAME=seu_usuario
   PASSWORD=sua_senha
   ```
+- Para executar o arquivo, na raiz do projeto `$ python block_user_log_post.py` e/ou executar na sua IDE de 
+  preferência.
 
 Após utilizar o script, rodar o comando `$ deactivate` no terminal para desativar o venv.
 
